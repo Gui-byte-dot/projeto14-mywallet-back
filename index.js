@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
 import { v4 as uuidV4 } from "uuid";
 import e from 'express';
@@ -36,13 +36,13 @@ app.post("/sign-in", async (req, res) => {
   
     const user = await db.collection("users").findOne({ email });
     console.log(token);
+    console.log(user)
     if (user && bcrypt.compareSync(password, user.password)) {
       await db.collection("sessions").insertOne({
         token,
         userId: user._id,
       });
       res.send({ token });
-      console.log(user)
     } else {
       res.sendStatus(401);
     }
@@ -53,20 +53,26 @@ app.post("/sign-in", async (req, res) => {
     const token = authorization?.replace("Bearer ", "");
     const sessions = await db.collection("sessions").findOne({ token });
     const user = await db.collection("users").findOne({ _id: sessions?.userId });
-    const {_id} = user;
+    const sim = user._id;
+
+   
+
 
     if (!token) {
       return res.sendStatus(401);
     }
     try{
         await db.collection('reports').insertOne({
-            _id,
-            value,
-            description,    
-            type,
+          sim,
+          value,
+          description,    
+          type,
         });
         delete user.password;
-        console.log(user)
+        console.log(user._id)
+        console.log(sim)
+       
+
 
         res.sendStatus(201);
     }catch(err){
@@ -86,7 +92,7 @@ app.post("/sign-in", async (req, res) => {
   
     try {
       delete user.password;
-      const infos = await db.collection('reports').find().toArray();
+      const infos = await db.collection('reports').find({sim:user._id}).toArray();
       console.log(user);
       res.send(infos);
 
