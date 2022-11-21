@@ -53,7 +53,7 @@ app.post("/sign-in", async (req, res) => {
     const token = authorization?.replace("Bearer ", "");
     const sessions = await db.collection("sessions").findOne({ token });
     const user = await db.collection("users").findOne({ _id: sessions?.userId });
-    const sim = user._id;
+    let sim = user._id;
 
    
 
@@ -70,6 +70,7 @@ app.post("/sign-in", async (req, res) => {
         });
         delete user.password;
         console.log(user._id)
+        console.log(user)
         console.log(sim)
        
 
@@ -91,7 +92,6 @@ app.post("/sign-in", async (req, res) => {
     }
   
     try {
-      delete user.password;
       const infos = await db.collection('reports').find({sim:user._id}).toArray();
       console.log(user);
       res.send(infos);
@@ -101,10 +101,10 @@ app.post("/sign-in", async (req, res) => {
       res.sendStatus(500);
     }
   });
-  app.listen(5000, () => {
-    console.log("Server is listening on port 3000.")
-  });
-
+ 
+app.listen(process.env.PORT, () => {
+  console.log("Server running on port " + process.env.PORT);
+});
 
 
 
